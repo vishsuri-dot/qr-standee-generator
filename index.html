@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeTravel QR Standee Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --teal: #19BED2;
+      --teal-dark: #0E8FA0;
+      --dark: #1A1F2E;
+      --grey: #5F6368;
+      --bg: #F8F9FA;
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .container {
+      max-width: 540px;
+      width: 100%;
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--dark);
+    }
+    .subtitle {
+      color: var(--grey);
+      font-size: 14px;
+      margin: 0 0 32px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--dark);
+      background: white;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--teal);
+    }
+    .field {
+      margin-bottom: 18px;
+    }
+    button {
+      width: 100%;
+      padding: 13px;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+      margin-top: 8px;
+    }
+    button:hover:not(:disabled) {
+      background: var(--teal-dark);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--grey);
+      text-align: center;
+      min-height: 18px;
+    }
+    .status.error { color: #DC2626; }
+    .status.success { color: #059669; }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+    .logo-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--grey);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <span class="logo-dot"></span>
+      <span class="logo-text">WeTravel · In-Person Pay</span>
+    </div>
+    <h1>QR Standee Generator</h1>
+    <p class="subtitle">Generate a branded, print-ready QR code standee in a few seconds.</p>
+
+    <form id="form">
+      <div class="field">
+        <label for="format">Format</label>
+        <select id="format" required>
+          <option value="a5">A5 Standee — for lobbies & counters (148 × 210 mm)</option>
+          <option value="card">Business Card — for phone cases (85.6 × 54 mm)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="orgName">Organizer Name</label>
+        <input type="text" id="orgName" placeholder="e.g., Patagonia Profunda" required>
+      </div>
+
+      <div class="field">
+        <label for="url">QR Code URL</label>
+        <input type="url" id="url" placeholder="https://www.wetravel.com/popups/spot_payment_link?uuid=..." required>
+      </div>
+
+      <button type="submit" id="generate">Generate PDF</button>
+    </form>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+  <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
