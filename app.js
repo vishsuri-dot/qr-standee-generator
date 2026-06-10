@@ -44,13 +44,35 @@ async function loadAssets() {
 }
 
 async function generateQrPng(url, errorCorrectionLevel = 'M') {
-  // qrcode.js produces a PNG data URL with crisp pixel scaling
-  const dataUrl = await QRCode.toDataURL(url, {
-    errorCorrectionLevel,
-    margin: 0,
-    width: 1000,
-    color: { dark: '#000000', light: '#FFFFFF' },
-  });
+  // Using qrcode-generator (Kazuhiko Arase). It exposes a global `qrcode` function.
+  // typeNumber = 0 means auto-detect the smallest version that fits the data.
+  const qr = qrcode(0, errorCorrectionLevel);
+  qr.addData(url);
+  qr.make();
+
+  // Render to a canvas at high resolution to get crisp PNG data
+  const moduleCount = qr.getModuleCount();
+  const cellSize = 16; // px per module — ~16 × 41 modules = 656px wide for v6
+  const margin = 0;
+  const size = moduleCount * cellSize + 2 * margin;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#000000';
+  for (let row = 0; row < moduleCount; row++) {
+    for (let col = 0; col < moduleCount; col++) {
+      if (qr.isDark(row, col)) {
+        ctx.fillRect(margin + col * cellSize, margin + row * cellSize, cellSize, cellSize);
+      }
+    }
+  }
+
+  // canvas -> PNG bytes
+  const dataUrl = canvas.toDataURL('image/png');
   const base64 = dataUrl.split(',')[1];
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
