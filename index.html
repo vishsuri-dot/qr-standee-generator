@@ -22,6 +22,7 @@
       --warning-text: #92400E;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     html, body { font-size: 16px; }
     body {
       font-family: 'Poppins', system-ui, -apple-system, sans-serif;
@@ -138,6 +139,18 @@
       font-size: 12px;
       line-height: 1.4;
     }
+    .url-ok {
+      display: flex;
+      gap: 8px;
+      margin: 8px 0 0;
+      padding: 8px 12px;
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+      color: #065F46;
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
 
     /* generate button */
     .button-primary {
@@ -201,10 +214,29 @@
       text-transform: uppercase; letter-spacing: 0.05em;
       color: var(--grey);
     }
-    .preview-spinner {
-      font-size: 11px;
-      color: var(--grey-light);
+    .preview-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: rgba(248,249,250,0.88);
+      color: var(--grey);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 2;
     }
+    .spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid var(--border);
+      border-top-color: var(--teal);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .preview-frame-wrap {
       position: relative;
       width: 100%;
@@ -388,9 +420,10 @@
             <label for="url">QR Code URL</label>
             <input type="url" id="url" placeholder="https://www.wetravel.com/popups/spot_payment_link?uuid=..." required autocomplete="off">
             <div class="warning" id="urlWarning" hidden>This doesn't look like a WeTravel payment link — double-check before generating.</div>
+            <div class="url-ok" id="urlOk" hidden>✓ This link is in the correct format.</div>
           </div>
           <button type="submit" class="button-primary" id="generate">
-            Generate PDF <span class="kbd">⌘ ↵</span>
+            Generate Preview <span class="kbd">⌘ ↵</span>
           </button>
           <div class="status" id="status"></div>
         </form>
@@ -416,12 +449,15 @@ Cruise in Galapagos, https://www.wetravel.com/popups/spot_payment_link?uuid=6818
       <div class="panel preview-panel">
         <div class="preview-header">
           <span class="preview-title">Preview</span>
-          <span class="preview-spinner" id="previewSpinner" hidden>rendering…</span>
         </div>
         <div class="preview-frame-wrap a5" id="previewWrap">
           <iframe class="preview-frame" id="previewFrame" title="Standee preview" hidden></iframe>
           <div class="preview-empty" id="previewEmpty">
             <div>Fill the form to see a preview</div>
+          </div>
+          <div class="preview-loading" id="previewLoading" hidden>
+            <div class="spinner"></div>
+            <span>Generating preview…</span>
           </div>
         </div>
       </div>

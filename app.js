@@ -282,12 +282,23 @@ async function buildByFormat(format, orgName, url) {
 // ---------- URL validation ----------
 function checkUrl() {
   const url = $('url').value.trim();
-  const warn = $('urlWarning');
-  warn.hidden = !url || URL_PATTERN.test(url);
+  const valid = URL_PATTERN.test(url);
+  $('urlWarning').hidden = !url || valid;
+  $('urlOk').hidden = !url || !valid;
 }
 
 // ---------- live preview ----------
 let lastPreviewBlobUrl = null;
+let previewIsCurrent = false;
+
+function setSingleButton(label) {
+  $('generate').innerHTML = `${label} <span class="kbd">⌘ ↵</span>`;
+}
+function setPreviewCurrent(v) {
+  previewIsCurrent = v;
+  setSingleButton(v ? 'Download PDF' : 'Generate Preview');
+}
+
 async function renderPreview() {
   const mode = currentMode();
   const format = $('format').value;
@@ -305,7 +316,7 @@ async function renderPreview() {
 
   if (!orgName || !url) { hidePreview(); return; }
 
-  $('previewSpinner').hidden = false;
+  $('previewLoading').hidden = false;
   $('previewEmpty').hidden = true;
   try {
     const bytes = await buildByFormat(format, orgName, url);
@@ -316,11 +327,12 @@ async function renderPreview() {
     // append #toolbar=0 to suppress PDF toolbar where supported
     frame.src = lastPreviewBlobUrl + '#toolbar=0&navpanes=0';
     frame.hidden = false;
+    setPreviewCurrent(true);
   } catch (e) {
     console.error('Preview error:', e);
     hidePreview('Could not render preview');
   } finally {
-    $('previewSpinner').hidden = true;
+    $('previewLoading').hidden = true;
   }
 }
 function hidePreview(msg = 'Fill the form to see a preview') {
@@ -329,6 +341,7 @@ function hidePreview(msg = 'Fill the form to see a preview') {
   const empty = $('previewEmpty');
   empty.hidden = false;
   empty.firstElementChild.textContent = msg;
+  setPreviewCurrent(false);
 }
 const renderPreviewDebounced = debounce(renderPreview, 500);
 
@@ -430,9 +443,11 @@ function setupSingle() {
   const orgName = $('orgName');
   const url     = $('url');
 
-  url.addEventListener('input', () => { checkUrl(); renderPreviewDebounced(); });
+  const invalidatePreview = () => { if (previewIsCurrent) setPreviewCurrent(false); };
+
+  url.addEventListener('input', () => { checkUrl(); invalidatePreview(); renderPreviewDebounced(); });
   url.addEventListener('blur', checkUrl);
-  orgName.addEventListener('input', renderPreviewDebounced);
+  orgName.addEventListener('input', () => { invalidatePreview(); renderPreviewDebounced(); });
   $('format').addEventListener('change', () => { renderPreview(); });
 
   form.addEventListener('submit', async (e) => {
@@ -445,6 +460,16 @@ function setupSingle() {
       status.className = 'status error';
       return;
     }
+
+    // first click renders the preview; the button then becomes Download PDF
+    if (!previewIsCurrent) {
+      status.textContent = ''; status.className = 'status';
+      button.disabled = true;
+      await renderPreview();
+      button.disabled = false;
+      return;
+    }
+
     button.disabled = true; button.innerHTML = 'Generating…';
     status.textContent = 'Building your PDF…'; status.className = 'status';
     try {
@@ -460,7 +485,7 @@ function setupSingle() {
       status.className = 'status error';
     } finally {
       button.disabled = false;
-      button.innerHTML = 'Generate PDF <span class="kbd">⌘ ↵</span>';
+      setPreviewCurrent(previewIsCurrent);
     }
   });
 }
