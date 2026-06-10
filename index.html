@@ -11,68 +11,136 @@
     :root {
       --teal: #19BED2;
       --teal-dark: #0E8FA0;
+      --teal-soft: #E3F8FB;
       --dark: #1A1F2E;
       --grey: #5F6368;
+      --grey-light: #9CA3AF;
       --bg: #F8F9FA;
       --border: #E5E7EB;
+      --warning-bg: #FEF3C7;
+      --warning-border: #FCD34D;
+      --warning-text: #92400E;
     }
     * { box-sizing: border-box; }
+    html, body { font-size: 16px; }
     body {
       font-family: 'Poppins', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--dark);
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 24px;
     }
-    .container {
-      max-width: 540px;
-      width: 100%;
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .logo-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--teal);
+    }
+    .logo-text {
+      font-size: 13px; font-weight: 600;
+      color: var(--grey); text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    h1 { font-size: 24px; font-weight: 700; margin: 0 0 6px; }
+    .subtitle { color: var(--grey); font-size: 14px; margin: 0 0 24px; }
+
+    /* layout: 2 columns desktop, 1 column mobile */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .panel {
       background: white;
       border-radius: 16px;
-      padding: 40px;
+      padding: 28px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.06);
     }
-    h1 {
-      font-size: 24px;
-      font-weight: 700;
-      margin: 0 0 8px;
-      color: var(--dark);
+    @media (max-width: 768px) {
+      body { padding: 16px; }
+      .layout { grid-template-columns: 1fr; }
+      .panel { padding: 20px; border-radius: 12px; }
     }
-    .subtitle {
+
+    /* tabs */
+    .tabs {
+      display: flex;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 20px;
+      gap: 4px;
+    }
+    .tab {
+      flex: 1;
+      padding: 9px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
       color: var(--grey);
-      font-size: 14px;
-      margin: 0 0 32px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
     }
+    .tab.active {
+      background: white;
+      color: var(--dark);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* form fields */
     label {
       display: block;
       font-size: 13px;
       font-weight: 600;
-      color: var(--dark);
       margin-bottom: 6px;
     }
-    input, select {
+    input, select, textarea {
       width: 100%;
       padding: 11px 14px;
       border: 1.5px solid var(--border);
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 16px;
       font-family: inherit;
       color: var(--dark);
       background: white;
       transition: border-color 0.15s;
     }
-    input:focus, select:focus {
+    textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: var(--teal);
     }
-    .field {
-      margin-bottom: 18px;
+    .field { margin-bottom: 16px; }
+
+    /* warning */
+    .warning {
+      display: flex;
+      gap: 8px;
+      margin: 8px 0 0;
+      padding: 8px 12px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--warning-text);
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 1.4;
     }
-    button {
+
+    /* generate button */
+    .button-primary {
       width: 100%;
       padding: 13px;
       background: var(--teal);
@@ -84,83 +152,298 @@
       cursor: pointer;
       font-family: inherit;
       transition: background 0.15s;
-      margin-top: 8px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    button:hover:not(:disabled) {
-      background: var(--teal-dark);
+    .button-primary:hover:not(:disabled) { background: var(--teal-dark); }
+    .button-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .kbd {
+      font-size: 11px;
+      padding: 2px 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      font-family: ui-monospace, monospace;
+      opacity: 0.8;
     }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    @media (max-width: 768px) {
+      .button-primary { padding: 14px; min-height: 48px; }
+      .kbd { display: none; }
     }
+
+    /* status */
     .status {
-      margin-top: 16px;
+      margin-top: 14px;
       font-size: 13px;
       color: var(--grey);
       text-align: center;
       min-height: 18px;
+      line-height: 1.4;
     }
     .status.error { color: #DC2626; }
     .status.success { color: #059669; }
-    .logo {
+
+    /* preview */
+    .preview-panel {
+      position: sticky;
+      top: 24px;
+    }
+    .preview-header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 24px;
+      justify-content: space-between;
+      margin-bottom: 12px;
     }
-    .logo-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--teal);
+    .preview-title {
+      font-size: 13px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--grey);
     }
-    .logo-text {
+    .preview-spinner {
+      font-size: 11px;
+      color: var(--grey-light);
+    }
+    .preview-frame-wrap {
+      position: relative;
+      width: 100%;
+      background: var(--bg);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .preview-frame-wrap.a5    { aspect-ratio: 154 / 216; }
+    .preview-frame-wrap.card  { aspect-ratio: 91.6 / 60; }
+    .preview-frame {
+      width: 100%; height: 100%;
+      border: none;
+      display: block;
+    }
+    .preview-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--grey-light);
+      font-size: 13px;
+      text-align: center;
+      padding: 20px;
+    }
+    @media (max-width: 768px) {
+      .preview-panel { position: static; }
+    }
+
+    /* recent */
+    .recent {
+      margin-top: 20px;
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .recent[open] { padding-bottom: 20px; }
+    .recent summary {
       font-size: 13px;
       font-weight: 600;
       color: var(--grey);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+    .recent summary::-webkit-details-marker { display: none; }
+    .recent summary::after {
+      content: '▾';
+      color: var(--grey-light);
+      transition: transform 0.15s;
+    }
+    .recent[open] summary::after { transform: rotate(-180deg); }
+    .recent-count {
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: auto;
+      margin-right: 12px;
+    }
+    .recent-list { margin-top: 12px; }
+    .recent-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .recent-item:first-child { border-top: none; }
+    .recent-name {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--dark);
+      font-weight: 500;
+    }
+    .recent-format {
+      font-size: 11px;
+      padding: 2px 7px;
+      background: var(--bg);
+      color: var(--grey);
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .recent-redownload {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--dark);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .recent-redownload:hover { border-color: var(--teal); color: var(--teal-dark); }
+    .recent-empty {
+      color: var(--grey-light);
+      font-size: 13px;
+      margin: 12px 0 0;
+      text-align: center;
+    }
+    .recent-clear {
+      margin-top: 12px;
+      background: transparent;
+      border: none;
+      color: var(--grey-light);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 4px 0;
+    }
+    .recent-clear:hover { color: #DC2626; }
+
+    /* batch progress bar */
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--teal);
+      width: 0%;
+      transition: width 0.15s;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="page">
+
     <div class="logo">
       <span class="logo-dot"></span>
       <span class="logo-text">WeTravel · In-Person Pay</span>
     </div>
     <h1>QR Standee Generator</h1>
-    <p class="subtitle">Generate a branded, print-ready QR code standee in a few seconds.</p>
+    <p class="subtitle">Generate branded, print-ready QR code standees in a few seconds.</p>
 
-    <form id="form">
-      <div class="field">
-        <label for="format">Format</label>
-        <select id="format" required>
-          <option value="a5">A5 Standee — for lobbies & counters (148 × 210 mm)</option>
-          <option value="card">Business Card — for phone cases (85.6 × 54 mm)</option>
-        </select>
+    <div class="layout">
+
+      <!-- LEFT: form -->
+      <div class="panel">
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-mode="single" type="button">Single</button>
+          <button class="tab" data-mode="batch" type="button">Batch</button>
+        </div>
+
+        <!-- shared: format -->
+        <div class="field">
+          <label for="format">Format</label>
+          <select id="format" required>
+            <option value="a5">A5 Standee — for lobbies & counters (148 × 210 mm)</option>
+            <option value="card">Business Card — for phone cases (85.6 × 54 mm)</option>
+          </select>
+        </div>
+
+        <!-- SINGLE MODE -->
+        <form id="singleForm">
+          <div class="field">
+            <label for="orgName">Organizer Name</label>
+            <input type="text" id="orgName" placeholder="e.g., Patagonia Profunda" required autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="url">QR Code URL</label>
+            <input type="url" id="url" placeholder="https://www.wetravel.com/popups/spot_payment_link?uuid=..." required autocomplete="off">
+            <div class="warning" id="urlWarning" hidden>This doesn't look like a WeTravel payment link — double-check before generating.</div>
+          </div>
+          <button type="submit" class="button-primary" id="generate">
+            Generate PDF <span class="kbd">⌘ ↵</span>
+          </button>
+          <div class="status" id="status"></div>
+        </form>
+
+        <!-- BATCH MODE -->
+        <form id="batchForm" hidden>
+          <div class="field">
+            <label for="batchInput">Paste rows — one per line: <code>organizer_name, url</code></label>
+            <textarea id="batchInput" rows="9" placeholder="Patagonia Profunda, https://patagoniaprofunda.wetravel.com/popups/spot_payment_link?uuid=6625212770
+Hotel Camino Real, https://www.wetravel.com/popups/spot_payment_link?uuid=6159310429
+Cruise in Galapagos, https://www.wetravel.com/popups/spot_payment_link?uuid=6818443920"></textarea>
+          </div>
+          <button type="submit" class="button-primary" id="batchGenerate">
+            Generate ZIP <span class="kbd">⌘ ↵</span>
+          </button>
+          <div class="progress-track" id="progressTrack" hidden><div class="progress-fill" id="progressFill"></div></div>
+          <div class="status" id="batchStatus"></div>
+        </form>
+
       </div>
 
-      <div class="field">
-        <label for="orgName">Organizer Name</label>
-        <input type="text" id="orgName" placeholder="e.g., Patagonia Profunda" required>
+      <!-- RIGHT: preview -->
+      <div class="panel preview-panel">
+        <div class="preview-header">
+          <span class="preview-title">Preview</span>
+          <span class="preview-spinner" id="previewSpinner" hidden>rendering…</span>
+        </div>
+        <div class="preview-frame-wrap a5" id="previewWrap">
+          <iframe class="preview-frame" id="previewFrame" title="Standee preview" hidden></iframe>
+          <div class="preview-empty" id="previewEmpty">
+            <div>Fill the form to see a preview</div>
+          </div>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="url">QR Code URL</label>
-        <input type="url" id="url" placeholder="https://www.wetravel.com/popups/spot_payment_link?uuid=..." required>
-      </div>
+    </div>
 
-      <button type="submit" id="generate">Generate PDF</button>
-    </form>
+    <!-- recent -->
+    <details class="recent" id="recent">
+      <summary>
+        Recent (this browser only)
+        <span class="recent-count" id="recentCount" hidden></span>
+      </summary>
+      <div class="recent-list" id="recentList"></div>
+      <button class="recent-clear" id="recentClear" type="button">Clear history</button>
+    </details>
 
-    <div class="status" id="status"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
-  <!-- qrcode-generator: tiny pure-JS QR lib, exposes global `qrcode` function -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
