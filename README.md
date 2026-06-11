@@ -8,6 +8,8 @@ A single-page web app that lets anyone generate WeTravel-branded QR code standee
 QR Standee Web App/
 ├── index.html          ← the page (form UI)
 ├── app.js              ← PDF generation logic (pdf-lib + qrcode.js)
+├── middleware.js       ← Google Workspace SSO gate (Vercel Edge Middleware)
+├── api/auth/callback.js ← OAuth callback that sets the session cookie
 ├── assets/             ← payment + WeTravel logos (PNG, transparent)
 ├── fonts/              ← Poppins-Bold.ttf
 ├── Dockerfile          ← nginx:alpine static-serve image
@@ -75,6 +77,29 @@ vercel --prod   # for production
 
 ---
 
+## Google Workspace SSO (Vercel only)
+
+The site is gated behind Google sign-in restricted to `@wetravel.com` accounts:
+
+- `middleware.js` — Edge Middleware that checks a signed session cookie on every request and redirects to Google sign-in if it's missing or expired. **Fails closed**: until the env vars below are set, the deployment returns 503 rather than serving unprotected.
+- `api/auth/callback.js` — exchanges the OAuth code, verifies the email domain, sets the session cookie (7 days).
+
+Setup (one-time):
+
+1. In [Google Cloud console](https://console.cloud.google.com/apis/credentials) (any project under the WeTravel Workspace), create an **OAuth client ID** → type **Web application**. Add the authorized redirect URI: `https://<your-production-domain>/api/auth/callback`.
+2. In the Vercel project → **Settings → Environment Variables**, add:
+   - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` — from step 1
+   - `SESSION_SECRET` — a long random string, e.g. `openssl rand -hex 32`
+   - `ALLOWED_DOMAIN` — optional, defaults to `wetravel.com`
+3. Redeploy.
+
+Notes:
+
+- Local dev (`python3 -m http.server`, Docker) is unaffected — the middleware only runs on Vercel.
+- Sign in with the production URL you registered in step 1. Preview deployment URLs change per deploy, so they won't pass Google's redirect-URI check — add specific preview URLs in the Google console if you need them, or rely on Vercel's built-in preview protection.
+
+---
+
 ## Deploy elsewhere
 
 Pure static site. Drop it on Netlify, GitHub Pages, Cloudflare Pages, S3+CloudFront, or any nginx/Caddy server. The Dockerfile above already gives you a portable container.
@@ -94,7 +119,7 @@ The A5 and business card layouts are in `buildA5()` and `buildCard()`. Each func
 
 ## Notes for engineering
 
-- **No secrets** — fully client-side, no env vars, no API keys
+- **Secrets** — PDF generation is fully client-side; the only server-side code is the SSO gate (`middleware.js` + `api/auth/callback.js`), configured via the env vars listed above. The Google client secret and session secret live only in Vercel env vars, never in the repo
 - **CDN deps** — `pdf-lib`, `@pdf-lib/fontkit`, `qrcode` (all from unpkg). If you want to vendor them for offline / CSP reasons, copy into `vendor/` and update the `<script>` tags in `index.html`
 - **Bundle size** — fonts + logos ≈ 1 MB. Loaded lazily on first generate
 - **No analytics / telemetry** baked in. Add what your org needs
