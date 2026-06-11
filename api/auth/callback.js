@@ -1,12 +1,25 @@
 /*
  * OAuth callback for the Google Workspace SSO gate (see middleware.js).
- * Exchanges the auth code with Google, verifies the email domain, then sets
- * the signed session cookie that middleware.js checks on every request.
+ * Exchanges the auth code with Google, checks the login nonce, verifies the
+ * email domain, then sets the signed session cookie that middleware.js checks
+ * on every request.
  */
 
 const crypto = require('crypto');
 
 const SESSION_DAYS = 7;
+const NONCE_COOKIE = 'wt_oauth_nonce';
+
+function timingSafeEqualStr(a, b) {
+  const ba = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  return ba.length === bb.length && crypto.timingSafeEqual(ba, bb);
+}
+
+function getCookie(header, name) {
+  const match = (header || '').match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
+  return match ? match[1] : null;
+}
 
 module.exports = async (req, res) => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -19,8 +32,17 @@ module.exports = async (req, res) => {
   }
 
   const { code, state, error } = req.query;
-  if (error || !code) {
+  if (error || !code || typeof state !== 'string') {
     res.status(401).send(`Sign-in failed: ${error || 'missing authorization code'}`);
+    return;
+  }
+
+  // the login must finish in the same browser that started it
+  const sep = state.indexOf('|');
+  const stateNonce = sep === -1 ? '' : state.slice(0, sep);
+  const cookieNonce = getCookie(req.headers.cookie, NONCE_COOKIE);
+  if (!stateNonce || !cookieNonce || !timingSafeEqualStr(stateNonce, cookieNonce)) {
+    res.status(401).send('Sign-in failed: state mismatch. Go back to the app and try again.');
     return;
   }
 
@@ -55,12 +77,15 @@ module.exports = async (req, res) => {
     exp: Date.now() + SESSION_DAYS * 24 * 3600 * 1000,
   })).toString('base64url');
   const sig = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
-  res.setHeader('Set-Cookie',
-    `wt_session=${payload}.${sig}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 24 * 3600}`);
+  res.setHeader('Set-Cookie', [
+    `wt_session=${payload}.${sig}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 24 * 3600}`,
+    `${NONCE_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+  ]);
 
-  // state holds the originally requested path; reject anything that isn't a
-  // local path so the redirect can't be pointed off-site
-  const dest = typeof state === 'string' && state.startsWith('/') && !state.startsWith('//') ? state : '/';
+  // state holds the originally requested path; only allow a local path —
+  // no '//' or '\' forms that browsers would treat as an external redirect
+  const path = state.slice(sep + 1);
+  const dest = path.startsWith('/') && !path.startsWith('//') && !path.includes('\\') ? path : '/';
   res.statusCode = 302;
   res.setHeader('Location', dest);
   res.end();
